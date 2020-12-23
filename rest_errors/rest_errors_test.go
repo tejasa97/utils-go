@@ -1,6 +1,7 @@
 package rest_errors
 
 import (
+	"errors"
 	"net/http"
 	"testing"
 
@@ -8,11 +9,15 @@ import (
 )
 
 func TestNewInternalServerError(t *testing.T) {
-	err := NewInternalServerError("this is the message")
+	err := NewInternalServerError("this is the message", errors.New("DB error"))
 	assert.NotNil(t, err)
 	assert.EqualValues(t, http.StatusInternalServerError, err.Status)
 	assert.EqualValues(t, "internal_server_error", err.Error)
 	assert.EqualValues(t, "this is the message", err.Message)
+
+	assert.NotNil(t, err.Causes)
+	assert.EqualValues(t, 1, len(err.Causes))
+	assert.EqualValues(t, "DB error", err.Causes[0])
 }
 
 func TestNewBadRequestError(t *testing.T) {
